@@ -4,7 +4,6 @@ def remote = [:]
     remote.user = 'ubuntu'
     remote.password = 'password'
     remote.allowAnyHosts = true
-    }
   
 
 pipeline {
