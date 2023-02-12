@@ -2,7 +2,7 @@ def remote = [:]
     remote.name = 'Docker-server'
     remote.host = '52.87.189.140'
     remote.user = 'ubuntu'
-    remote.password = 'password'
+    remote.password = 'October2023#'
     remote.allowAnyHosts = true
   
 
