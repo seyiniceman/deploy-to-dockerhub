@@ -1,3 +1,12 @@
+def remote = [:]
+    remote.name = 'Docker-server'
+    remote.host = '52.87.189.140'
+    remote.user = 'ubuntu'
+    remote.password = 'password'
+    remote.allowAnyHosts = true
+    }
+  
+
 pipeline {
   agent any
   environment {
@@ -34,5 +43,9 @@ pipeline {
               sh "docker rmi $imagename:latest"
                         }
             }
+      stage('Remote SSH') {
+      sshCommand remote: remote, command: "ls -lrt"
+      sshCommand remote: remote, command: "docker run -d -p 8080:8080 austinobioma/october-docker"
+    
       }
   }
