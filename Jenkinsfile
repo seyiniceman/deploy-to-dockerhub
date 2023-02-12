@@ -40,7 +40,7 @@ pipeline {
       stage('Remote SSH') {
           steps{
       sshCommand remote: remote, command: "ls -lrt"
-      sshCommand remote: remote, command: "docker run -d -p 80:8080 austinobioma/october-docker"
+      sshCommand remote: remote, command: "docker run -d -p 80:8080 austinobioma/october-docker:7"
       }
       }
     
