@@ -2,17 +2,17 @@
 pipeline {
   agent any
   environment {
-       imagename = "austinobioma/october-docker"
+       imagename = "austinobioma/december-docker"
        registryCredential = 'DockerHub'
        dockerImage = ''
            }
   stages {
-    stage ('Build') {
-      steps {
-        sh 'mvn clean package'
+     stage ('Build') {
+       steps {
+         sh 'mvn clean package'
       }
-    }
-    stage('Building Docker image') {
+     }
+     stage('Building Docker image') {
           steps{
                 script {
                      dockerImage = docker.build imagename
@@ -36,5 +36,6 @@ pipeline {
                         }
             }
     
-      }
-  }
+    }
+ }
+
