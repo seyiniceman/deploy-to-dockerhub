@@ -1,6 +1,6 @@
 def remote = [:]
     remote.name = 'Docker-server'
-    remote.host = '54.161.108.229'
+    remote.host = '18.119.130.224'
     remote.user = 'ubuntu'
     remote.password = 'December2023#'
     remote.allowAnyHosts = true
@@ -9,7 +9,7 @@ def remote = [:]
 pipeline {
   agent any
   environment {
-       imagename = "austinobioma/october-docker"
+       imagename = "austinobioma/docker-class"
        registryCredential = 'DockerHub'
        dockerImage = ''
            }
@@ -26,7 +26,7 @@ pipeline {
                           }
                       }
                 }
-     stage('Deploy Image') {
+     stage('Push Image to dockerHub') {
            steps{
                script {
                     docker.withRegistry( '', registryCredential ) {
@@ -40,7 +40,7 @@ pipeline {
       stage('Remote SSH') {
           steps{
       sshCommand remote: remote, command: "ls -lrt"
-      sshCommand remote: remote, command: "docker run -d -p 80:8080 austinobioma/october-docker:7"
+      sshCommand remote: remote, command: "docker run -d -p 8080:8080 austinobioma/october-docker:1"
       }
       }
     
