@@ -45,7 +45,7 @@ pipeline {
       stage('Remote SSH') {
         steps{
           sshCommand remote: remote, command: "ls -lrt"
-          sshCommand remote: remote, command: "docker run -d -p 8080:8080 austinobioma/feb-class:latest"
+          sshCommand remote: remote, command: "docker run --name devops-app -d -p 80:8080 austinobioma/feb-class:2"
           }
       }
     
