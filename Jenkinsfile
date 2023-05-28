@@ -1,8 +1,8 @@
 def remote = [:]
     remote.name = 'Docker-server'
-    remote.host = '18.119.130.224'
+    remote.host = '13.59.216.85'
     remote.user = 'ubuntu'
-    remote.password = 'December2023#'
+    remote.password = 'Februaryclass2023#'
     remote.allowAnyHosts = true
 
 
@@ -10,14 +10,14 @@ pipeline {
   agent any
 
   environment {
-       imagename = "austinobioma/docker-class"
+       imagename = "austinobioma/feb-class"
        registryCredential = 'DockerHub'
        dockerImage = ''
            }
 
     stages {
 
-      stage ('Build') {
+      stage (' MaVEN Build') {
         steps {
           sh 'mvn clean package'
        }
@@ -26,7 +26,7 @@ pipeline {
       stage('Building Docker image') {
           steps{
                 script {
-                     dockerImage = docker.build imagename
+                     dockerImage = docker.build imagename 
                       }
                 }
       }
@@ -45,7 +45,7 @@ pipeline {
       stage('Remote SSH') {
         steps{
           sshCommand remote: remote, command: "ls -lrt"
-          sshCommand remote: remote, command: "docker run -d -p 8080:8080 austinobioma/docker-class:5"
+          sshCommand remote: remote, command: "docker run -d -p 8080:8080 austinobioma/feb-class:latest"
           }
       }
     
