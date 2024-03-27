@@ -13,9 +13,6 @@ pipeline {
      stages {
 
           stage ('Build') {
-              agent {
-                label "maven"
-              }
            steps {
              script{
                container('maven'){
@@ -30,8 +27,13 @@ pipeline {
                 DOCKERFILE  = "Dockerfile"
                 GITREPO     = "git://github.com/obiomaokorowu/deploy-to-dockerhub.git"
                 CONTEXT     = "."
-                REGISTRY    = 'austinobioma/december-docker'
-                TAG         = 'latest'
+                VERSION = "${env.BUILD_ID}"
+                AWS_ACCOUNT_ID="590183877304"
+                AWS_DEFAULT_REGION="eu-west-1"
+                IMAGE_REPO_NAME="test"
+                IMAGE_TAG= "${env.BUILD_ID}"
+                REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+
             }
                steps{
                    script {
@@ -40,7 +42,7 @@ pipeline {
                     --context=\${GITREPO} \\
                     --context-sub-path=\${CONTEXT} \\
                     --dockerfile=\${DOCKERFILE} \\
-                    --destination=${REGISTRY}:${TAG}
+                    --destination=${REPOSITORY_URI}:${IMAGE_TAG}
                        '''
                           }
                    }
