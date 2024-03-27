@@ -34,7 +34,7 @@ pipeline {
                      container('kaniko'){
                        sh '''/kaniko/executor --dockerfile `pwd`/ Dockerfile \
                                             --context `pwd` \
-                                            --destination=$imagename:${BUILD_NUMBER}
+                                            --destination=$imagename:${BUILD_NUMBER} --cache
                        '''
                           }
                    }
