@@ -26,15 +26,21 @@ pipeline {
         }   
 
           stage('Building Docker image') {
-                    agent{
-                      label "kaniko"
-                    }
+                    environment {
+                DOCKERFILE  = "Dockerfile"
+                GITREPO     = "https://github.com/obiomaokorowu/deploy-to-dockerhub.git"
+                CONTEXT     = "."
+                REGISTRY    = 'austinobioma/december-docker'
+                TAG         = 'latest'
+            }
                steps{
                    script {
                      container('kaniko'){
-                       sh '''/kaniko/executor --dockerfile `pwd`/ Dockerfile \
-                                            --context `pwd` \
-                                            --destination=$imagename:${BUILD_NUMBER} --cache
+                       sh '''/kaniko/executor  \\
+                    --context=\${GITREPO} \\
+                    --context-sub-path=\${CONTEXT} \\
+                    --dockerfile=\${DOCKERFILE} \\
+                    --destination=\${REGISTRY}/\:\${TAG}
                        '''
                           }
                    }
