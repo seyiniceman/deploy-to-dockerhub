@@ -1,6 +1,5 @@
   
-pipeline {
-  agent any
+node("kubeagent") {
 
   environment {
        imagename = "austinobioma/december-docker"
