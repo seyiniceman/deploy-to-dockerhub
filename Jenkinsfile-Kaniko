@@ -13,6 +13,9 @@ pipeline {
      stages {
 
           stage ('Build') {
+              agent {
+                label "maven"
+              }
            steps {
              script{
                container('maven'){
@@ -23,6 +26,9 @@ pipeline {
         }   
 
           stage('Building Docker image') {
+                    agent{
+                      label "kaniko"
+                    }
                steps{
                    script {
                      container('kaniko'){
