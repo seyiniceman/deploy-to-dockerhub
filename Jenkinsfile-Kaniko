@@ -1,5 +1,8 @@
   
-node("kubeagent") {
+pipeline {
+  agent {
+     label "maven"
+  }
 
   environment {
        imagename = "austinobioma/december-docker"
