@@ -50,6 +50,7 @@ pipeline {
 
         stage('Update Deployment File') {
             environment {
+                GIT_REPO_URL = "https://github.com/obiomaokorowu/deploy-to-dockerhub.git"
                 GIT_REPO_NAME = "deploy-to-dockerhub" 
                 GIT_USER_NAME = "austinobioma"
                 VERSION = "${env.BUILD_NUMBER}"
@@ -60,7 +61,7 @@ pipeline {
                     container('helm'){
                         withCredentials([usernamePassword(credentialsId: 'GitHub_Access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                             sh '''
-                                git clone https://github.com/obiomaokorowu/deploy-to-dockerhub.git
+                                git clone ${GIT_REPO_URL}
                                 git config user.email "austin.microlabs@gmail.com"
                                 git config user.name "austinobioma"
                                 OLD_BUILD_NUMBER=$((${env.BUILD_NUMBER}))
