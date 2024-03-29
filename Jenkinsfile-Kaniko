@@ -55,7 +55,7 @@ pipeline {
                 GIT_USER_NAME = "austinobioma"
                 VERSION = "${env.BUILD_NUMBER}"
                 GITHUB_CREDENTIALS = credentials('GitHub_Access')
-                OLD_BUILD_NUMBER="$(("${BUILD_NUMBER}"-1))"
+                OLD_BUILD_NUMBER="$(( ${env.BUILD_NUMBER} - 1 ))"
             }
             steps {
                 script{
