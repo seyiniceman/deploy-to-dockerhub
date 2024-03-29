@@ -53,11 +53,12 @@ pipeline {
                 GIT_REPO_NAME = "/deploy-to-dockerhub" 
                 GIT_USER_NAME = "austinobioma"
                 VERSION = "${env.BUILD_NUMBER}"
+                GITHUB_CREDENTIALS = credentials('GitHub_Access')
             }
             steps {
                 script{
                     container('helm'){
-                        withCredentials([string(credentialsId: 'GitHub_Access', variable: 'GITHUB_TOKEN')]) {
+                        withCredentials([usernamePassword(credentialsId: 'GitHub_Access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                             sh '''
                                 git config user.email "austin.microlabs@gmail.com"
                                 git config user.name "austinobioma"
@@ -65,7 +66,7 @@ pipeline {
                                 sed -i "s/${OLD_BUILD_NUMBER}/${env.BUILD_NUMBER}/g" webapp/Chart.yaml
                                 git add webapp/Chart.yaml
                                 git commit -m "Update deployment image to version ${env.BUILD_NUMBER}"
-                                git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                                git push https://${USERNAME}:${PASSWORD}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                             '''
                         }
                     }
