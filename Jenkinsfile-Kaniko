@@ -34,7 +34,7 @@ pipeline {
                         sh '''/kaniko/executor \\
                             --build-arg="-v $PWD:/workspace" \\
                             --context git://github.com/obiomaokorowu/deploy-to-dockerhub.git \\
-                            --context-sub-path . \\
+                            --context-sub-path /workspace \\
                             --dockerfile Dockerfile \\
                             --cache-repo git://github.com/obiomaokorowu/deploy-to-dockerhub.git \\
                             --destination ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
