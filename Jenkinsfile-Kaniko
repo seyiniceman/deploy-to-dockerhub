@@ -38,12 +38,14 @@ pipeline {
                     steps {
                       script{
                         container('helm'){
+                          withAWS(role: "tf_sandbox_role", roleAccount: '590183877304') {
                           sh 'aws eks update-kubeconfig --name eks-csl_pay-sandbox-apps --region eu-west-1'
                           sh 'helm upgrade --install --namespace default --set image.repository="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}" --set image.tag="${IMAGE_TAG}" tomcat-app ./webapp -f ./webapp/values.yaml' 
                           }
  
                         }
                     }
+               }
             }
    }
 }
