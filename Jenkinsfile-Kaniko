@@ -50,7 +50,7 @@ pipeline {
 
         stage('Update Deployment File') {
             environment {
-                GIT_REPO_NAME = "/deploy-to-dockerhub" 
+                GIT_REPO_NAME = "deploy-to-dockerhub" 
                 GIT_USER_NAME = "austinobioma"
                 VERSION = "${env.BUILD_NUMBER}"
                 GITHUB_CREDENTIALS = credentials('GitHub_Access')
