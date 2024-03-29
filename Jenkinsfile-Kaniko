@@ -60,6 +60,7 @@ pipeline {
                     container('helm'){
                         withCredentials([usernamePassword(credentialsId: 'GitHub_Access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                             sh '''
+                                git clone https://github.com/obiomaokorowu/deploy-to-dockerhub.git
                                 git config user.email "austin.microlabs@gmail.com"
                                 git config user.name "austinobioma"
                                 OLD_BUILD_NUMBER=$((${env.BUILD_NUMBER}))
