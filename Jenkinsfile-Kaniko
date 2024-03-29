@@ -10,16 +10,6 @@ pipeline {
 
      stages {
 
-          stage ('Build') {
-           steps {
-             script{
-               container('maven'){
-           sh 'mvn clean package'
-                }
-            }
-          }
-        }   
-
           stage('Building Docker image') {
                     environment {
                 DOCKERFILE  = "Dockerfile"
