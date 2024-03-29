@@ -29,7 +29,7 @@ pipeline {
                 AWS_ACCOUNT_ID="590183877304"
                 AWS_DEFAULT_REGION="eu-west-1"
                 IMAGE_REPO_NAME="test"
-                IMAGE_TAG= "${env.BUILD_ID}"
+                IMAGE_TAG= "latest"
                 REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
 
             }
