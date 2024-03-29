@@ -17,7 +17,7 @@ pipeline {
                 container('kaniko') {
                     script {
                         def REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-                        def IMAGE_TAG = "${env.BUILD_ID}"
+                        def IMAGE_TAG = "latest"
                         sh '''/kaniko/executor \\
                             --build-arg="-v $PWD:/workspace" \\
                             --context git://github.com/obiomaokorowu/deploy-to-dockerhub.git \\
@@ -37,11 +37,11 @@ pipeline {
                  }
                     steps {
                       script{
-                        def IMAGE_TAG = "${env.BUILD_ID}"
+                        def IMAGE_TAG = "latest"
                         container('helm'){
                           withAWS(role: "tf_sandbox_role", roleAccount: '590183877304') {
                           sh 'aws eks update-kubeconfig --name eks-csl_pay-sandbox-apps --region eu-west-1'
-                          sh 'helm upgrade --install --namespace default --set image.repository="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}" --set image.tag="${IMAGE_TAG}" tomcat-app ./webapp -f ./webapp/values.yaml' 
+                          sh 'helm upgrade --install --namespace default --set image.repository="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}" --set image.tag="latest" tomcat-app ./webapp -f ./webapp/values.yaml' 
                           }
  
                         }
