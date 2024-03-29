@@ -20,7 +20,7 @@ pipeline {
             }
             post {
                 success {
-                    archiveArtifacts artifacts: '/target/hello-world.war', fingerprint: true
+                    archiveArtifacts artifacts: 'target/hello-world.war', fingerprint: true
                 }
             }
         }
