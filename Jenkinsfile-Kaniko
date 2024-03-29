@@ -12,18 +12,18 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
-            steps {
-                container('maven') {
-                    sh 'mvn clean package'
-                }
-            }
-            post {
-                success {
-                    archiveArtifacts artifacts: 'target/hello-world.war', fingerprint: true
-                }
-            }
-        }
+   //     stage('Build') {
+   //         steps {
+   //             container('maven') {
+   //                 sh 'mvn clean package'
+   //             }
+   //         }
+   //         post {
+   //             success {
+   //                 archiveArtifacts artifacts: 'target/hello-world.war', fingerprint: true
+   //             }
+   //         }
+   //     }
 
         stage('Building Docker image') {
             steps {
