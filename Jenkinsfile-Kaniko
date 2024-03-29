@@ -9,12 +9,22 @@ pipeline {
       }
 
      stages {
+          stage ('Build') {
+           steps {
+             script{
+               container('maven'){
+           sh 'mvn clean package'
+                }
+            }
+          }
+        }   
+
 
           stage('Building Docker image') {
                     environment {
                 DOCKERFILE  = "Dockerfile"
                 GITREPO     = "git://github.com/obiomaokorowu/deploy-to-dockerhub.git"
-                CONTEXT     = "."
+                CONTEXT     = "deploy-to-dockerhub"
                 VERSION = "${env.BUILD_ID}"
                 AWS_ACCOUNT_ID="590183877304"
                 AWS_DEFAULT_REGION="eu-west-1"
