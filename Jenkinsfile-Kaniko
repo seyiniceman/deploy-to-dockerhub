@@ -29,7 +29,7 @@ pipeline {
                 AWS_ACCOUNT_ID="590183877304"
                 AWS_DEFAULT_REGION="eu-west-1"
                 IMAGE_REPO_NAME="test"
-                IMAGE_TAG= "latest"
+                IMAGE_TAG= "${env.BUILD_ID}"
                 REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
 
             }
@@ -38,7 +38,6 @@ pipeline {
                      container('kaniko'){
                        sh '''/kaniko/executor  \\
                     --context=\${GITREPO} \\
-                    --context-sub-path=\${CONTEXT} \\
                     --dockerfile=\${DOCKERFILE} \\
                     --destination=${REPOSITORY_URI}:${IMAGE_TAG}
                        '''
