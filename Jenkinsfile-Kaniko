@@ -38,6 +38,7 @@ pipeline {
                      container('kaniko'){
                        sh '''/kaniko/executor  \\
                     --context=\${GITREPO} \\
+                    --context-sub-path=\${CONTEXT} \\
                     --dockerfile=\${DOCKERFILE} \\
                     --destination=${REPOSITORY_URI}:${IMAGE_TAG}
                        '''
