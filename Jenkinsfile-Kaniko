@@ -37,6 +37,7 @@ pipeline {
                  }
                     steps {
                       script{
+                        def IMAGE_TAG = "${env.BUILD_ID}"
                         container('helm'){
                           withAWS(role: "tf_sandbox_role", roleAccount: '590183877304') {
                           sh 'aws eks update-kubeconfig --name eks-csl_pay-sandbox-apps --region eu-west-1'
