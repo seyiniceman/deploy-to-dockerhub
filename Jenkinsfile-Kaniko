@@ -52,7 +52,7 @@ pipeline {
             environment {
                 GIT_REPO_URL = "https://github.com/obiomaokorowu/deploy-to-dockerhub.git"
                 GIT_REPO_NAME = "deploy-to-dockerhub" 
-                GIT_USER_NAME = "austinobioma"
+                GIT_USER_NAME = "obiomaokorowu"
                 VERSION = "${env.BUILD_NUMBER}"
                 GITHUB_CREDENTIALS = credentials('GitHub_Access')
                 OLD_BUILD_NUMBER="${env.BUILD_NUMBER - 1}"
