@@ -24,7 +24,7 @@ pipeline {
                     environment {
                 DOCKERFILE  = "Dockerfile"
                 GITREPO     = "git://github.com/obiomaokorowu/deploy-to-dockerhub.git"
-                CONTEXT     = "deploy-to-dockerhub"
+                CONTEXT     = "${GITREPO}"
                 VERSION = "${env.BUILD_ID}"
                 AWS_ACCOUNT_ID="590183877304"
                 AWS_DEFAULT_REGION="eu-west-1"
