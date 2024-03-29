@@ -16,14 +16,13 @@ pipeline {
             steps {
                 container('kaniko') {
                     script {
-                        def REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
                         def IMAGE_TAG = "latest"
                         sh '''/kaniko/executor \\
                             --build-arg="-v $PWD:/workspace" \\
                             --context git://github.com/obiomaokorowu/deploy-to-dockerhub.git \\
                             --dockerfile Dockerfile \\
                             --cache-repo git://github.com/obiomaokorowu/deploy-to-dockerhub.git \\
-                            --destination ${REPOSITORY_URI}:${IMAGE_TAG}
+                            --destination ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
                         '''
                     }
                 }
