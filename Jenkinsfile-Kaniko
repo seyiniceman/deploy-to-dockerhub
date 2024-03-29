@@ -65,7 +65,7 @@ pipeline {
                                 dir("${GIT_REPO_NAME}") { 
                                    sh 'git config user.email "austin.microlabs@gmail.com" && git config user.name "austinobioma"'
                                    sh """
-                                        sed -i "s/${OLD_BUILD_NUMBER}/${env.BUILD_NUMBER}/g" webapp/Chart.yaml
+                                        sed -i 's/appVersion:.*/appVersion: "${env.BUILD_NUMBER}"/' webapp/Chart.yaml
                                         git add webapp/Chart.yaml
                                         git commit -m "Update deployment image to version ${env.BUILD_NUMBER}"
                                         git push https://${USERNAME}:${PASSWORD}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
