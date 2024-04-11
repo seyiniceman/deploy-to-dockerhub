@@ -1,0 +1,120 @@
+pipeline {
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('aws_access_key_id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
+        AWS_ACCOUNT_ID = "590183877304"
+        AWS_DEFAULT_REGION = "eu-west-1"
+        NEXUS_VERSION = "nexus3"
+        NEXUS_PROTOCOL = "http"
+        NEXUS_URL = "nexus-sandbox.cslpay.io/repository"
+        NEXUS_REPOSITORY = "maven-nexus-repo"
+        NEXUS_CREDENTIAL_ID = "Nexus-Access"
+    }
+
+    agent {
+        label "kaniko"
+    }
+
+    stages {
+        stage("Publish to Nexus Repository Manager") {
+            steps {
+                script {
+                    pom = readMavenPom file: "pom.xml";
+                    filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
+                    echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
+                    artifactPath = filesByGlob[0].path;
+                    artifactExists = fileExists artifactPath;
+                    if(artifactExists) {
+                        echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
+                        nexusArtifactUploader(
+                            nexusVersion: NEXUS_VERSION,
+                            protocol: NEXUS_PROTOCOL,
+                            nexusUrl: NEXUS_URL,
+                            groupId: pom.groupId,
+                            version: pom.version,
+                            repository: NEXUS_REPOSITORY,
+                            credentialsId: NEXUS_CREDENTIAL_ID,
+                            artifacts: [
+                                [artifactId: pom.artifactId,
+                                classifier: '',
+                                file: artifactPath,
+                                type: pom.packaging],
+                                [artifactId: pom.artifactId,
+                                classifier: '',
+                                file: "pom.xml",
+                                type: "pom"]
+                            ]
+                        );
+                    } else {
+                        error "*** File: ${artifactPath}, could not be found";
+                    }
+                }
+            }
+        }
+
+        stage('Building Docker image') {
+            steps {
+                container('kaniko') {
+                    script {
+                        def IMAGE_TAG = "latest"
+                        sh '''/kaniko/executor \\
+                            --build-arg="-v $PWD:/workspace" \\
+                            --context git://github.com/obiomaokorowu/deploy-to-dockerhub.git \\
+                            --dockerfile Dockerfile \\
+                            --cache-repo git://github.com/obiomaokorowu/deploy-to-dockerhub.git \\
+                            --destination ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
+                        '''
+                    }
+                }
+            }
+        }
+
+        // stage('pull image & Deploying application on k8s cluster') {
+        //     environment {
+        //         AWS_ACCESS_KEY_ID = credentials('aws_access_key_id')
+        //         AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
+        //     }
+        //     steps {
+        //         script{
+        //             def IMAGE_TAG = "${env.BUILD_NUMBER}"
+        //             container('helm'){
+        //                 withAWS(role: "tf_sandbox_role", roleAccount: '590183877304') {
+        //                     sh 'aws eks update-kubeconfig --name eks-csl_pay-sandbox-apps --region eu-west-1'
+        //                     //sh 'helm upgrade --install --namespace default --set image.repository="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}" --set image.tag="latest" tomcat-app ./webapp -f ./webapp/values.yaml'
+        //                     sh 'helm uninstall --namespace default tomcat-app'
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage('Update Deployment File') {
+            environment {
+                GIT_REPO_URL = "https://github.com/obiomaokorowu/deploy-to-dockerhub.git"
+                GIT_REPO_NAME = "deploy-to-dockerhub" 
+                GIT_USER_NAME = "obiomaokorowu"
+                VERSION = "${env.BUILD_NUMBER}"
+                GITHUB_CREDENTIALS = credentials('GitHub_Access')
+                OLD_BUILD_NUMBER="${env.BUILD_NUMBER - 1}"
+            }
+            steps {
+                script{
+                    container('helm'){
+                        withCredentials([usernamePassword(credentialsId: 'GitHub_Access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                               sh 'git clone "${GIT_REPO_URL}"'
+                                dir("${GIT_REPO_NAME}") { 
+                                   sh 'git config user.email "austin.microlabs@gmail.com" && git config user.name "austinobioma"'
+                                   sh """
+                                        sed -i 's/appVersion:.*/appVersion: "${env.BUILD_NUMBER}"/' webapp/Chart.yaml
+                                        git add webapp/Chart.yaml
+                                        git commit -m "Update deployment image to version ${env.BUILD_NUMBER}"
+                                        git push https://${USERNAME}:${PASSWORD}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                                     """
+                        }
+                      }
+                    }
+                }
+            }
+        }
+    }
+}
