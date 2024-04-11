@@ -1,0 +1,16 @@
+# FROM openjdk:21
+# WORKDIR /
+# COPY ./src /src/
+# COPY ./target/*.jar /
+
+
+FROM maven:3.3.9-jdk-8-alpine as build
+WORKDIR /
+COPY . /
+RUN mvn clean package
+
+FROM openjdk:21 as base
+WORKDIR /
+COPY --from=build /target/* /
+#ENTRYPOINT ["java", "-jar", "csl-pay-remittance-commons-0.0.1-SNAPSHOT.jar"]
+
