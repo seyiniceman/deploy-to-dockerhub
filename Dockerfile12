@@ -1,0 +1,31 @@
+FROM maven:3-eclipse-temurin-21 AS build
+
+WORKDIR ${APP_DIR}
+ARG APP_DIR=/opt/cslpay
+WORKDIR ${APP_DIR}
+
+COPY csl-pay-remittance-commons ${APP_DIR}/csl-pay-remittance-commons
+RUN cd csl-pay-remittance-commons && mvn -U -T 1C clean install -DskipTests
+
+COPY fx-api-service ${APP_DIR}/
+RUN mvn -T 1C clean install -DskipTests
+
+FROM openjdk:21
+ARG ARTIFACTS_FOLDER=target/*.jar
+ARG APP_DIR=/opt/cslpay
+
+EXPOSE 80
+EXPOSE 8010
+WORKDIR ${APP_DIR}
+COPY --from=build ${APP_DIR}/${ARTIFACTS_FOLDER} ${APP_DIR}/fx-api-service.jar
+ENTRYPOINT ["java","-jar","fx-api-service.jar"]
+CMD ["--spring.profiles.active=${CLUSTER_NAME}", \
+    "--spring.datasource.url=jdbc:postgres://${DBHOST}:${DBPORT}/postgres?useSSL=false",\
+    "--spring.datasource.username=${DBUSER}",\
+    "--spring.datasource.password=${DBPASSWORD}",\
+    "--spring.kafka.bootstrap-servers=${KAFKA_HOST}",\
+    "--keycloak.resource=${KEYCLOAK_RESOURCE}",\
+    "--keycloak.realm=${KEYCLOAK_REALM}",\
+    "--keycloak.auth-server-url=${KEYCLOAK_HOST}",\
+    "--keycloak.credentials.secret=${KEYCLOAK_SECRET}"]
+
