@@ -1,0 +1,35 @@
+FROM amazoncorretto:17-alpine3.19 as corretto-jdk
+
+ARG version=21.0.2.14.1
+# required for strip-debug to work
+RUN apk add --no-cache binutils
+
+# RUN apk add binutils
+
+# Build small JRE image
+RUN $JAVA_HOME/bin/jlink \
+    --verbose \
+    --add-modules java.xml,java.compiler,java.rmi,java.sql,java.prefs,java.desktop,java.base,java.management,java.instrument,java.naming,java.net.http,java.security.jgss,java.security.sasl,java.sql,jdk.httpserver,jdk.unsupported,jdk.jcmd,jdk.attach,java.se,jdk.crypto.ec \
+    --strip-debug \
+    --no-man-pages \
+    --no-header-files \
+    --compress=2 \
+    --output /customjre
+
+
+
+# main app image
+FROM alpine:latest
+ENV JAVA_HOME=/jre
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+# copy JRE from the base image
+COPY --from=corretto-jdk /customjre $JAVA_HOME
+
+MAINTAINER USHAHEMBA UKANGE <ushahemba.ukange@interswitchng.com>
+
+EXPOSE 8080 8080
+
+COPY ./target/switch-online-advise-service-1.0.0.jar /tmp/switch-online-advise-service.jar
+
+CMD ["/jre/bin/java", "-jar", "/tmp/switch-online-advise-service.jar"]
