@@ -1,0 +1,109 @@
+pipeline {
+    agent {
+        label "kaniko"
+         }
+          tools{
+        //     jdk 'Java21'
+             maven 'Maven'
+          }
+    environment {
+        NEXUS_CREDENTIALS = credentials('Nexus-Access')
+        CLONE_DIR = 'source-code'
+        GITHUB_REPO_URL = 'https://github.com/cslcapitaluk/csl-pay-remittance-routing-service.git'
+        AWS_ACCESS_KEY_ID = credentials('aws_access_key_id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
+        AWS_ACCOUNT_ID = "590183877304"
+        AWS_DEFAULT_REGION = "eu-west-1"
+        IMAGE_REPO_NAME = "middleware"
+        IMAGE_TAG= "0.${env.BUILD_ID}"
+        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+        }
+
+    stages {
+          stage('Checkout Common Repository'){
+                  agent{label "Runner"}
+              steps{
+                 script{
+                    println "Checkout Common Repository"
+                    }
+                  dir("csl-pay-remittance-commons"){
+                      checkout ( [$class: 'GitSCM',
+                         branches: [[name: "main" ]],
+                         userRemoteConfigs: [[
+                             credentialsId: 'GitHub_Access',
+                             url: 'https://github.com/cslcapitaluk/csl-pay-remittance-commons.git'
+                      ]]] )
+                    }
+               }
+            }
+            stage('Checkout App Repository'){
+                  agent{label "Runner"}
+            steps{
+                script{
+                    println "Checkout App Repository"
+                      }
+                 dir("csl-pay-remittance-middleware"){
+                    checkout ( [$class: 'GitSCM',
+                        branches: [[name: "main" ]],
+                        userRemoteConfigs: [[
+                          credentialsId: 'GitHub_Access',
+                          url: 'https://github.com/cslcapitaluk/csl-pay-remittance-middleware.git'
+                    ]]] )
+                  }
+              }
+          }
+        stage('Building A Docker image') {
+                  agent{label "Runner"}
+            steps{
+                script {
+                  dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+                   }
+            }
+          }
+          stage('Pushing to ECR') {
+                agent{label "Runner"}
+              steps{
+                  script {
+                    withAWS(role: "tf_sandbox_role", roleAccount: '590183877304') {
+                      sh '''
+                          aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+                          docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:$IMAGE_TAG
+                          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
+                        '''
+                 }
+               }
+             }
+         }
+        stage(' Update ArgoCD Deployment File') {
+            environment {
+                GIT_REPO_URL = "github.com/cslcapitaluk/cloud_cluster_config.git"
+                GIT_REPO_NAME = "cloud_cluster_config" 
+                GIT_USER_NAME = "cslcapitaluk"
+                VERSION = "${env.BUILD_NUMBER}"
+                GITHUB_CREDENTIALS = credentials('GitHub_Access')
+                PROTOCOL = "https"
+                      }
+            steps {
+                script{
+                  container('helm'){
+                    dir("cloud_cluster_config"){
+                        withCredentials([usernamePassword(credentialsId: 'GitHub_Access', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                         sh "git clone ${PROTOCOL}://${USERNAME}:${PASSWORD}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git"
+                           dir("${GIT_REPO_NAME}") { 
+                                   sh 'git config user.email "austin.microlabs@gmail.com" && git config user.name "austinobioma"'
+                                   sh """
+                                        sed -i 's/appVersion:.*/appVersion: "${IMAGE_TAG}"/' clusters/sandbox/src/services/csl-pay-remittance-middleware/Chart.yaml
+                                        git add .
+                                        git commit -m "Update deployment image to version ${IMAGE_TAG}"
+                                        git push ${PROTOCOL}://${USERNAME}:${PASSWORD}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                                   """
+                                   }
+                              }
+                         }
+                     }
+                }
+           }
+        }
+
+    }
+}
