@@ -1,0 +1,23 @@
+FROM maven:3-eclipse-temurin-21 AS build
+
+
+ARG APP_DIR=/opt/cslpay
+WORKDIR ${APP_DIR}
+
+COPY csl-pay-remittance-commons ${APP_DIR}/csl-pay-remittance-commons
+RUN cd csl-pay-remittance-commons && mvn -U -T 1C clean install -DskipTests
+
+COPY csl-pay-remittance-middleware ${APP_DIR}/
+RUN mvn -U -T 1C clean install -DskipTests
+
+FROM openjdk:21
+ARG ARTIFACTS_FOLDER=target/*.jar
+ARG APP_DIR=/opt/cslpay
+
+EXPOSE 80
+EXPOSE 8091
+WORKDIR ${APP_DIR}
+
+COPY --from=build ${APP_DIR}/${ARTIFACTS_FOLDER} ${APP_DIR}/csl-pay-remittance-middleware.jar
+ENTRYPOINT ["java","-jar","csl-pay-remittance-middleware.jar"]
+
