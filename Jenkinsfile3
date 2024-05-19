@@ -2,11 +2,11 @@ pipeline {
     environment {
         AWS_ACCESS_KEY_ID = credentials('aws_access_key_id')
         AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
-        AWS_ACCOUNT_ID = "590183877304"
+        AWS_ACCOUNT_ID = "xxxxxxxxxxxxxxx"
         AWS_DEFAULT_REGION = "eu-west-1"
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
-        NEXUS_URL = "nexus-sandbox.cslpay.io/repository"
+        NEXUS_URL = "nexus-url"
         NEXUS_REPOSITORY = "maven-nexus-repo"
         NEXUS_CREDENTIAL_ID = "Nexus-Access"
     }
