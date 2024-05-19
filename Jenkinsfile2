@@ -4,18 +4,11 @@ pipeline {
 
   environment {
        imagename = "austinobioma/december-docker"
-       registryCredential = 'DockerHub'
+       registryCredential = 'DOCKERLOGIN'
        dockerImage = ''
            }
 
      stages {
-
-          stage ('Build') {
-           steps {
-           sh 'mvn clean package'
-                }
-          }
-
           stage('Building Docker image') {
                steps{
                    script {
