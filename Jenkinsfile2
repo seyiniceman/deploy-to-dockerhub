@@ -1,10 +1,16 @@
-  
+def remote = [:]
+  remote.name = 'Docker Server'
+  remote.host = '18.191.56.118'
+  remote.user = 'ubuntu'
+  remote.password = 'Juneclass12#'
+  remote.allowAnyHosts = true  
+
 pipeline {
   agent any
 
   environment {
-       imagename = "austinobioma/december-docker"
-       registryCredential = 'DOCKERLOGIN'
+       imagename = "austinobioma/june-class2"
+       registryCredential = 'DockerHub'
        dockerImage = ''
            }
 
@@ -17,7 +23,7 @@ pipeline {
                }
           }
 
-          stage('Deploy Image') {
+          stage('Push Image To Docker Hub') {
                steps{
                      script {
                          docker.withRegistry( '', registryCredential ) {
@@ -27,6 +33,16 @@ pipeline {
                          }
                }
           }
+
+
+          stage('Deploy To Docker Server Using SSH') {
+               steps{
+                    script {
+                         sshCommand remote: remote, command: "docker run --name june-docker-class3 -d -p 80:8080 austinobioma/june-class2:1"
+                    }
+               }
+          }
+
 
           stage('Remove Unused docker image') {
                steps{
