@@ -41,7 +41,7 @@ pipeline {
  stage('Deploy To Docker Server Using SSH') {
                steps{
                     script {
-                         sshCommand remote: remote, command: "docker run --name olivia-docker-class3 -d -p 80:8080 seyiniceman/olivia2020:latest"
+                         sshCommand remote: remote, command: "docker run --name olivia-dhooker-class3 -d -p 80:8080 seyiniceman/olivia2020:latest"
                     }
                }
           }
