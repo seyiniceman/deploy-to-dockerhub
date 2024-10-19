@@ -1,16 +1,17 @@
 def remote = [:]
   remote.name = 'Docker Server'
-  remote.host = '18.191.56.118'
+  remote.host = '34.246.135.95'
   remote.user = 'ubuntu'
-  remote.password = 'Juneclass12#'
-  remote.allowAnyHosts = true  
+  remote.password = 'lincon'
+  remote.allowAnyHosts = true
+
 
 pipeline {
   agent any
 
   environment {
-       imagename = "austinobioma/june-class2"
-       registryCredential = 'DockerHub'
+       imagename = "seyiniceman/olivia2020"
+       registryCredential = 'Docker_ID'
        dockerImage = ''
            }
 
@@ -35,14 +36,15 @@ pipeline {
           }
 
 
-          stage('Deploy To Docker Server Using SSH') {
+
+
+ stage('Deploy To Docker Server Using SSH') {
                steps{
                     script {
-                         sshCommand remote: remote, command: "docker run --name june-docker-class3 -d -p 80:8080 austinobioma/june-class2:2"
+                         sshCommand remote: remote, command: "docker run --name olivia-docker-class3 -d -p 80:8080 seyiniceman/olivia2020:latest"
                     }
                }
           }
-
 
           stage('Remove Unused docker image') {
                steps{
